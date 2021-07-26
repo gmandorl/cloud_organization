@@ -9,6 +9,7 @@ if __name__ == '__main__':
 
     run_metrics( file_name ="/home/gmandorli/firstProject/clds_AIRS-ERAI_vertical_0130AM_20080103_smallsmallSLICE.nc")
     #run_metrics( file_name ="/home/gmandorli/firstProject/clds_AIRS-ERAI_vertical_0130AM_20080103_smallSLICE.nc")
+    #run_metrics( file_name ="/home/gmandorli/firstProject/clds_AIRS-ERAI_vertical_0130AM_20080103_SLICE.nc")
 
     stop = timeit.default_timer()
     print('This script needed {} seconds.'.format(stop-start))
