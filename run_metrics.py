@@ -1,7 +1,7 @@
 import xarray as xr
 import numpy as np
 import datetime
-import functools
+#import functools
 #import math as m
 import timeit
 import skimage.measure as skm
@@ -50,8 +50,29 @@ def get_objects(sky_scene) :
     #cax = divider.append_axes("right", size="5%", pad=0.05)
     #plt.colorbar(im, cax=cax), plt.show()
 
-    return objects, objects
+    polys = []
+    for o in objects:
+        layout = o.image.astype(int)
+        bounds = o.bbox
+        y_length = bounds[2] - bounds[0]
+        x_length = bounds[3] - bounds[1]
+        # prepare bed to put layout in
+        bed = np.zeros(shape=(y_length + 2, x_length + 2))
+        bed[1:-1, 1:-1] = layout
+        # get the contour needed for shapely
+        contour = skm.find_contours(bed, level=0.5, fully_connected='high')
+        # increase coordinates to get placement inside of original input array right
+        contour[0][:, 0] += bounds[0]  # increase y-values
+        contour[0][:, 1] += bounds[1]  # increase x-values
+        # sugar coating needed for shapely (contour only consists of 1 object...anyways)
+        coordinates = [tuple(c)  for c in contour[0]]
 
+        m_poly = spg.Polygon(coordinates)
+        #print(m_poly.centroid, m_poly.area, m_poly.length, "\n\n")
+        polys.append(m_poly)
+
+
+    return objects, polys
 
 
 
@@ -66,22 +87,25 @@ def run_metrics( file_name="") :
 
     list_regions, list_polys = get_objects(sky_scene)
 
+
     print ("total_number_of_pixels : ", sky_scene.shape[0], sky_scene.shape[1], total_number_of_pixels)
     #print ("list_regions : ", len(list_regions) ,"\n", list_regions)
     #print ("list_polys : ", len(list_polys) ,"\n", list_polys)
 
     #all_s_pairs = [Pairs(pairlist=list(gen_tuplelist(cloudlist))) for cloudlist in props_s]
-    all_r_pairs = Pairs(pairlist=list(gen_tuplelist(list_regions)))
+    all_pairs = Pairs(region_pairs=list(gen_tuplelist(list_regions)), poly_pairs=list(gen_tuplelist(list_polys)))
 
-    print ("all_r_pairs : ", all_r_pairs)
+    #print ("all_pairs : ", all_pairs)
 
-    #iorg = metrics.i_org(pairs=all_r_pairs, objects=list_regions, total_number_of_pixels = total_number_of_pixels)
-    iorg = metrics.i_org(pairs=all_r_pairs, objects=list_regions, total_number_of_pixels = 9841.)
-    #iorg = xr.DataArray([i_org(pairs=all_r_pairs[i], objects=props_r[i]) for i in range(len(all_r_pairs))]) if switch['iorg'] else np.nan
+    #iorg = metrics.i_org(pairs=all_pairs, objects=list_regions, total_number_of_pixels = total_number_of_pixels)
+    iorg = metrics.i_org(pairs=all_pairs, objects=list_regions, total_number_of_pixels = 9841.)
+
+    rom = 6.25 * metrics.radar_organisation_metric(all_pairs)
 
 
     fileTXT = open("txt_files/info_"+str(datetime.datetime.now().strftime('%y%m%d_%H%M%S'))+".txt","w")
-    fileTXT.write("rom: \t" + str(iorg) + "\n")
+    fileTXT.write("file name: \t" + file_name + "\n")
+    fileTXT.write("rom: \t" + str(rom) + "\n")
     fileTXT.write("iorg: \t" + str(iorg) + "\n\n")
     fileTXT.close()
 
