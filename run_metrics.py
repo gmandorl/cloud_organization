@@ -12,7 +12,7 @@ import metrics
 
 
 
-def run_metrics( file_name="") :
+def run_metrics( file_name="", data_LT=0) :
 
 
 
@@ -74,7 +74,7 @@ def run_metrics( file_name="") :
                        'cloud_max_area':    (("time"), np.ones(1)*cloud_max_area),
                        },
                      #coords={"time": [datetime.datetime(2008, 1, 3)],}
-                     coords={"time": [datetime.datetime.now()],}
+                     coords={"time": [data_LT],}
     )
 
 
