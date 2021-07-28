@@ -122,8 +122,8 @@ class Pairs:
         #print("self.partner1[i].coords", self.partner1[i].coords)
         r1_xy = np.array(self.partner1[i].coords)
         r2_xy = np.array(self.partner2[i].coords)
-        deltaX = r1_xy[:,0] - r2_xy[:,0]
-        deltaY = r1_xy[:,1] - r2_xy[:,1]
+        deltaX = r1_xy[:,0] - r2_xy[:,0][:,None]
+        deltaY = r1_xy[:,1] - r2_xy[:,1][:,None]
         return math.sqrt(np.amin(deltaX**2 + deltaY**2)) - 1
 
 
